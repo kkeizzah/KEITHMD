@@ -33,7 +33,6 @@
       "required": false
     },
     
-    // AntiCall settings
     "ANTICALL_STATUS": {
       "description": "Enable/disable anti-call feature (true/false)",
       "value": "false",
@@ -50,7 +49,6 @@
       "required": false
     },
     
-    // AntiDelete settings
     "ANTIDELETE_STATUS": {
       "description": "Enable/disable anti-delete feature (true/false)",
       "value": "true",
@@ -77,7 +75,6 @@
       "required": false
     },
     
-    // AntiLink settings
     "ANTILINK_STATUS": {
       "description": "Anti-link mode: off, warn, delete, or remove",
       "value": "off",
@@ -94,7 +91,6 @@
       "required": false
     },
     
-    // AntiStatusMention settings
     "ANTISTATUSMENTION_STATUS": {
       "description": "Anti-status-mention mode: off, warn, delete, or remove",
       "value": "warn",
@@ -111,7 +107,6 @@
       "required": false
     },
     
-    // AutoBio settings
     "AUTOBIO_STATUS": {
       "description": "Enable auto bio: on or off",
       "value": "off",
@@ -123,7 +118,6 @@
       "required": false
     },
     
-    // AutoRead settings
     "AUTOREAD_STATUS": {
       "description": "Enable auto read messages (true/false)",
       "value": "false",
@@ -135,7 +129,6 @@
       "required": false
     },
     
-    // AutoStatus settings
     "AUTOSTATUS_AUTOVIEW_STATUS": {
       "description": "Auto view status (true/false)",
       "value": "true",
@@ -162,7 +155,6 @@
       "required": false
     },
     
-    // Chatbot settings
     "CHATBOT_STATUS": {
       "description": "Enable chatbot: on or off",
       "value": "off",
@@ -183,13 +175,7 @@
       "value": "text",
       "required": false
     },
-    "CHATBOT_VOICE": {
-      "description": "Voice for audio responses",
-      "value": "Kimberly",
-      "required": false
-    },
     
-    // Greet settings
     "GREET_ENABLED": {
       "description": "Enable greet messages (true/false)",
       "value": "false",
@@ -201,7 +187,6 @@
       "required": false
     },
     
-    // GroupEvents settings
     "GROUPEVENTS_ENABLED": {
       "description": "Enable group events (true/false)",
       "value": "false",
@@ -223,7 +208,6 @@
       "required": false
     },
     
-    // Presence settings
     "PRESENCE_PRIVATE_CHAT": {
       "description": "Presence in private chat: off, online, typing, or recording",
       "value": "off",
@@ -235,7 +219,6 @@
       "required": false
     },
     
-    // Bot settings
     "BOT_PREFIX": {
       "description": "Bot command prefix",
       "value": ".",
