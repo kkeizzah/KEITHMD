@@ -1,20 +1,20 @@
 const { DataTypes } = require('sequelize');
-const { database } = require('../settings');
+const { database, antilinkStatus, antilinkAction, antilinkWarnLimit } = require('../settings');
 
 const AntiLinkDB = database.define('antilink', {
     status: {
         type: DataTypes.ENUM('off', 'warn', 'delete', 'remove'),
-        defaultValue: 'off',
+        defaultValue: antilinkStatus,
         allowNull: false
     },
     action: {
         type: DataTypes.ENUM('warn', 'delete', 'remove'),
-        defaultValue: 'warn',
+        defaultValue: antilinkAction,
         allowNull: false
     },
     warn_limit: {
         type: DataTypes.INTEGER,
-        defaultValue: 3,
+        defaultValue: antilinkWarnLimit,
         allowNull: false
     }
 }, {
@@ -28,6 +28,17 @@ async function initAntiLinkDB() {
     try {
         await AntiLinkDB.sync({ alter: true });
         console.log('AntiLink table ready');
+        
+        // Initialize with default values if empty
+        const count = await AntiLinkDB.count();
+        if (count === 0) {
+            await AntiLinkDB.create({
+                status: antilinkStatus,
+                action: antilinkAction,
+                warn_limit: antilinkWarnLimit
+            });
+            console.log('AntiLink defaults initialized from settings');
+        }
     } catch (error) {
         console.error('Error initializing AntiLink table:', error);
         throw error;
@@ -38,15 +49,19 @@ async function getAntiLinkSettings() {
     try {
         const [settings] = await AntiLinkDB.findOrCreate({
             where: {},
-            defaults: {}
+            defaults: {
+                status: antilinkStatus,
+                action: antilinkAction,
+                warn_limit: antilinkWarnLimit
+            }
         });
         return settings;
     } catch (error) {
         console.error('Error getting antilink settings:', error);
         return { 
-            status: 'off', 
-            action: 'warn', 
-            warn_limit: 5
+            status: antilinkStatus, 
+            action: antilinkAction, 
+            warn_limit: antilinkWarnLimit
         };
     }
 }
