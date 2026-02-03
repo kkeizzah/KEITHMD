@@ -1,31 +1,37 @@
-
 const { DataTypes } = require('sequelize');
-const { database } = require('../settings');
+const { 
+  database, 
+  antideleteStatus, 
+  antideleteNotification, 
+  antideleteIncludeGroupInfo, 
+  antideleteSendToOwner, 
+  antideleteIncludeMedia 
+} = require('../settings');
 
 const AntiDeleteDB = database.define('antidelete', {
     status: {
         type: DataTypes.BOOLEAN,
-        defaultValue: true,
+        defaultValue: antideleteStatus,
         allowNull: false
     },
     notification: {
         type: DataTypes.STRING,
-        defaultValue: '👿 *Keith antiDelete* 👿',
+        defaultValue: antideleteNotification,
         allowNull: false
     },
     includeGroupInfo: {
         type: DataTypes.BOOLEAN,
-        defaultValue: true,
+        defaultValue: antideleteIncludeGroupInfo,
         allowNull: false
     },
     sendToOwner: {
         type: DataTypes.BOOLEAN,
-        defaultValue: true,
+        defaultValue: antideleteSendToOwner,
         allowNull: false
     },
     includeMedia: {
         type: DataTypes.BOOLEAN,
-        defaultValue: true,
+        defaultValue: antideleteIncludeMedia,
         allowNull: false
     }
 }, {
@@ -36,6 +42,19 @@ async function initAntiDeleteDB() {
     try {
         await AntiDeleteDB.sync({ alter: true });
         console.log('AntiDelete table ready');
+        
+        // Initialize with default values if empty
+        const count = await AntiDeleteDB.count();
+        if (count === 0) {
+            await AntiDeleteDB.create({
+                status: antideleteStatus,
+                notification: antideleteNotification,
+                includeGroupInfo: antideleteIncludeGroupInfo,
+                sendToOwner: antideleteSendToOwner,
+                includeMedia: antideleteIncludeMedia
+            });
+            console.log('AntiDelete defaults initialized from settings');
+        }
     } catch (error) {
         console.error('Error initializing AntiDelete table:', error);
         throw error;
@@ -46,16 +65,23 @@ async function getAntiDeleteSettings() {
     try {
         const settings = await AntiDeleteDB.findOne();
         if (!settings) {
-            return await AntiDeleteDB.create({});
+            return await AntiDeleteDB.create({
+                status: antideleteStatus,
+                notification: antideleteNotification,
+                includeGroupInfo: antideleteIncludeGroupInfo,
+                sendToOwner: antideleteSendToOwner,
+                includeMedia: antideleteIncludeMedia
+            });
         }
         return settings;
     } catch (error) {
         console.error('Error getting anti-delete settings:', error);
         return { 
-            status: true, 
-            notification: '👿 *Keith antiDelete* 👿',
-            includeGroupInfo: true,
-            includeMedia: true
+            status: antideleteStatus, 
+            notification: antideleteNotification,
+            includeGroupInfo: antideleteIncludeGroupInfo,
+            sendToOwner: antideleteSendToOwner,
+            includeMedia: antideleteIncludeMedia
         };
     }
 }
