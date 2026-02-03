@@ -1,15 +1,15 @@
 const { DataTypes } = require('sequelize');
-const { database } = require('../settings');
+const { database, autobioStatus, autobioMessage } = require('../settings');
 
 const AutoBioDB = database.define('autobio', {
     status: {
         type: DataTypes.ENUM('on', 'off'),
-        defaultValue: 'off',
+        defaultValue: autobioStatus,
         allowNull: false
     },
     message: {
         type: DataTypes.STRING,
-        defaultValue: 'KEITH-MD Always active!',
+        defaultValue: autobioMessage,
         allowNull: false
     }
 }, {
@@ -20,6 +20,16 @@ async function initAutoBioDB() {
     try {
         await AutoBioDB.sync({ alter: true });
         console.log('AutoBio table ready');
+        
+        // Initialize with default values if empty
+        const count = await AutoBioDB.count();
+        if (count === 0) {
+            await AutoBioDB.create({
+                status: autobioStatus,
+                message: autobioMessage
+            });
+            console.log('AutoBio defaults initialized from settings');
+        }
     } catch (error) {
         console.error('Error initializing AutoBio table:', error);
         throw error;
@@ -30,12 +40,18 @@ async function getAutoBioSettings() {
     try {
         const [settings] = await AutoBioDB.findOrCreate({
             where: {},
-            defaults: {}
+            defaults: {
+                status: autobioStatus,
+                message: autobioMessage
+            }
         });
         return settings;
     } catch (error) {
         console.error('Error getting AutoBio settings:', error);
-        return { status: 'off', message: 'KEITH-MD Always active!' };
+        return { 
+            status: autobioStatus, 
+            message: autobioMessage 
+        };
     }
 }
 
