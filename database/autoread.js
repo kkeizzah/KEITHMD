@@ -1,15 +1,15 @@
 const { DataTypes } = require('sequelize');
-const { database } = require('../settings');
+const { database, autoreadStatus, autoreadChatTypes } = require('../settings');
 
 const AutoReadDB = database.define('autoread', {
     status: {
         type: DataTypes.BOOLEAN,
-        defaultValue: false,
+        defaultValue: autoreadStatus,
         allowNull: false
     },
     chatTypes: {
         type: DataTypes.JSON,
-        defaultValue: ['private', 'group'],
+        defaultValue: autoreadChatTypes,
         allowNull: false
     }
 }, {
@@ -20,6 +20,16 @@ async function initAutoReadDB() {
     try {
         await AutoReadDB.sync({ alter: true });
         console.log('AutoRead table ready');
+        
+        // Initialize with default values if empty
+        const count = await AutoReadDB.count();
+        if (count === 0) {
+            await AutoReadDB.create({
+                status: autoreadStatus,
+                chatTypes: autoreadChatTypes
+            });
+            console.log('AutoRead defaults initialized from settings');
+        }
     } catch (error) {
         console.error('Error initializing AutoRead table:', error);
         throw error;
@@ -30,12 +40,18 @@ async function getAutoReadSettings() {
     try {
         const settings = await AutoReadDB.findOne();
         if (!settings) {
-            return await AutoReadDB.create({});
+            return await AutoReadDB.create({
+                status: autoreadStatus,
+                chatTypes: autoreadChatTypes
+            });
         }
         return settings;
     } catch (error) {
         console.error('Error getting auto-read settings:', error);
-        return { status: false, chatTypes: ['private', 'group'] };
+        return { 
+            status: autoreadStatus, 
+            chatTypes: autoreadChatTypes 
+        };
     }
 }
 
