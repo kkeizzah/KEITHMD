@@ -1,5 +1,12 @@
 const { database } = require('../settings');
 const { DataTypes } = require('sequelize');
+const { 
+  chatbotStatus, 
+  chatbotMode, 
+  chatbotTrigger, 
+  chatbotDefaultResponse, 
+  chatbotVoice 
+} = require('../settings');
 
 // Define chatbot conversation table
 const ChatbotConversationDB = database.define('chatbot_conversations', {
@@ -41,27 +48,27 @@ const ChatbotConversationDB = database.define('chatbot_conversations', {
 const ChatbotSettingsDB = database.define('chatbot_settings', {
     status: {
         type: DataTypes.ENUM('on', 'off'),
-        defaultValue: 'off',
+        defaultValue: chatbotStatus,
         allowNull: false
     },
     mode: {
         type: DataTypes.ENUM('private', 'group', 'both'),
-        defaultValue: 'private',
+        defaultValue: chatbotMode,
         allowNull: false
     },
     trigger: {
         type: DataTypes.STRING,
-        defaultValue: 'dm',
+        defaultValue: chatbotTrigger,
         allowNull: false
     },
     default_response: {
         type: DataTypes.ENUM('text', 'audio'),
-        defaultValue: 'text',
+        defaultValue: chatbotDefaultResponse,
         allowNull: false
     },
     voice: {
         type: DataTypes.STRING,
-        defaultValue: 'Kimberly',
+        defaultValue: chatbotVoice,
         allowNull: false
     }
 }, {
@@ -85,11 +92,11 @@ async function initChatbotDB() {
         const count = await ChatbotSettingsDB.count();
         if (count === 0) {
             await ChatbotSettingsDB.create({
-                status: 'off',
-                mode: 'private',
-                trigger: 'dm',
-                default_response: 'text',
-                voice: 'Kimberly'
+                status: chatbotStatus,
+                mode: chatbotMode,
+                trigger: chatbotTrigger,
+                default_response: chatbotDefaultResponse,
+                voice: chatbotVoice
             });
             console.log('Chatbot defaults initialized from settings');
         }
@@ -178,22 +185,22 @@ async function getChatbotSettings() {
         const [settings] = await ChatbotSettingsDB.findOrCreate({
             where: {},
             defaults: {
-                status: 'off',
-                mode: 'private',
-                trigger: 'dm',
-                default_response: 'text',
-                voice: 'Kimberly'
+                status: chatbotStatus,
+                mode: chatbotMode,
+                trigger: chatbotTrigger,
+                default_response: chatbotDefaultResponse,
+                voice: chatbotVoice
             }
         });
         return settings;
     } catch (error) {
         console.error('Error getting chatbot settings:', error);
         return { 
-            status: 'off', 
-            mode: 'private', 
-            trigger: 'dm',
-            default_response: 'text',
-            voice: 'Kimberly'
+            status: chatbotStatus, 
+            mode: chatbotMode, 
+            trigger: chatbotTrigger,
+            default_response: chatbotDefaultResponse,
+            voice: chatbotVoice
         };
     }
 }
