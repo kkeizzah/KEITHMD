@@ -80,6 +80,19 @@ async function initChatbotDB() {
         await ChatbotConversationDB.sync({ alter: true });
         await ChatbotSettingsDB.sync({ alter: true });
         console.log('Chatbot tables ready');
+        
+        // Initialize with default values if empty
+        const count = await ChatbotSettingsDB.count();
+        if (count === 0) {
+            await ChatbotSettingsDB.create({
+                status: 'off',
+                mode: 'private',
+                trigger: 'dm',
+                default_response: 'text',
+                voice: 'Kimberly'
+            });
+            console.log('Chatbot defaults initialized from settings');
+        }
     } catch (error) {
         console.error('Error initializing Chatbot tables:', error);
         throw error;
@@ -164,7 +177,13 @@ async function getChatbotSettings() {
     try {
         const [settings] = await ChatbotSettingsDB.findOrCreate({
             where: {},
-            defaults: {}
+            defaults: {
+                status: 'off',
+                mode: 'private',
+                trigger: 'dm',
+                default_response: 'text',
+                voice: 'Kimberly'
+            }
         });
         return settings;
     } catch (error) {
