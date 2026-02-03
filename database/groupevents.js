@@ -1,25 +1,31 @@
 const { DataTypes } = require('sequelize');
-const { database } = require('../settings');
+const { 
+  database, 
+  groupeventsEnabled, 
+  groupeventsWelcomeMessage, 
+  groupeventsGoodbyeMessage, 
+  groupeventsShowPromotions 
+} = require('../settings');
 
 const GroupEventsDB = database.define('groupevents', {
     enabled: {
         type: DataTypes.BOOLEAN,
-        defaultValue: false,
+        defaultValue: groupeventsEnabled,
         allowNull: false
     },
     welcomeMessage: {
         type: DataTypes.TEXT,
-        defaultValue: "Hey @user 👋\nWelcome to *{group}*.\nYou're member #{count}.\nTime: *{time}*\nDescription: {desc}",
+        defaultValue: groupeventsWelcomeMessage,
         allowNull: false
     },
     goodbyeMessage: {
         type: DataTypes.TEXT,
-        defaultValue: "Goodbye @user 😔\nLeft at: *{time}*\nMembers left: {count}",
+        defaultValue: groupeventsGoodbyeMessage,
         allowNull: false
     },
     showPromotions: {
         type: DataTypes.BOOLEAN,
-        defaultValue: true,
+        defaultValue: groupeventsShowPromotions,
         allowNull: false
     }
 }, {
@@ -30,6 +36,18 @@ async function initGroupEventsDB() {
     try {
         await GroupEventsDB.sync({ alter: true });
         console.log('GroupEvents table ready');
+        
+        // Initialize with default values if empty
+        const count = await GroupEventsDB.count();
+        if (count === 0) {
+            await GroupEventsDB.create({
+                enabled: groupeventsEnabled,
+                welcomeMessage: groupeventsWelcomeMessage,
+                goodbyeMessage: groupeventsGoodbyeMessage,
+                showPromotions: groupeventsShowPromotions
+            });
+            console.log('GroupEvents defaults initialized from settings');
+        }
     } catch (error) {
         console.error('Error initializing GroupEvents table:', error);
         throw error;
@@ -40,16 +58,21 @@ async function getGroupEventsSettings() {
     try {
         const settings = await GroupEventsDB.findOne();
         if (!settings) {
-            return await GroupEventsDB.create({});
+            return await GroupEventsDB.create({
+                enabled: groupeventsEnabled,
+                welcomeMessage: groupeventsWelcomeMessage,
+                goodbyeMessage: groupeventsGoodbyeMessage,
+                showPromotions: groupeventsShowPromotions
+            });
         }
         return settings;
     } catch (error) {
         console.error('Error getting group events settings:', error);
         return { 
-            enabled: false,
-            welcomeMessage: "Welcome @user to {group}!",
-            goodbyeMessage: "Goodbye @user!",
-            showPromotions: true
+            enabled: groupeventsEnabled,
+            welcomeMessage: groupeventsWelcomeMessage,
+            goodbyeMessage: groupeventsGoodbyeMessage,
+            showPromotions: groupeventsShowPromotions
         };
     }
 }
