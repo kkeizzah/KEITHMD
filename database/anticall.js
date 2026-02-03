@@ -1,20 +1,20 @@
 const { DataTypes } = require('sequelize');
-const { database } = require('../settings');
+const { database, anticallStatus, anticallMessage, anticallAction } = require('../settings');
 
 const AntiCallDB = database.define('anticall', {
     status: {
         type: DataTypes.BOOLEAN,
-        defaultValue: false,
+        defaultValue: anticallStatus,
         allowNull: false
     },
     message: {
         type: DataTypes.STRING,
-        defaultValue: 'Call me later 🙏',
+        defaultValue: anticallMessage,
         allowNull: false
     },
     action: {
         type: DataTypes.ENUM('reject', 'block'),
-        defaultValue: 'reject',
+        defaultValue: anticallAction,
         allowNull: false
     }
 }, {
@@ -25,6 +25,17 @@ async function initAntiCallDB() {
     try {
         await AntiCallDB.sync({ alter: true });
         console.log('AntiCall table ready');
+        
+        // Initialize with default values if empty
+        const count = await AntiCallDB.count();
+        if (count === 0) {
+            await AntiCallDB.create({
+                status: anticallStatus,
+                message: anticallMessage,
+                action: anticallAction
+            });
+            console.log('AntiCall defaults initialized from settings');
+        }
     } catch (error) {
         console.error('Error initializing AntiCall table:', error);
         throw error;
@@ -35,12 +46,22 @@ async function getAntiCallSettings() {
     try {
         const settings = await AntiCallDB.findOne();
         if (!settings) {
-            return await AntiCallDB.create({});
+            // Create with environment defaults
+            return await AntiCallDB.create({
+                status: anticallStatus,
+                message: anticallMessage,
+                action: anticallAction
+            });
         }
         return settings;
     } catch (error) {
         console.error('Error getting anti-call settings:', error);
-        return { status: true, message: 'call me later 🙏', action: 'reject' };
+        // Return environment defaults as fallback
+        return { 
+            status: anticallStatus, 
+            message: anticallMessage, 
+            action: anticallAction 
+        };
     }
 }
 
