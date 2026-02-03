@@ -1,20 +1,20 @@
 const { DataTypes } = require('sequelize');
-const { database } = require('../settings');
+const { database, antistatusmentionStatus, antistatusmentionAction, antistatusmentionWarnLimit } = require('../settings');
 
 const AntiStatusMentionDB = database.define('antistatusmention', {
     status: {
         type: DataTypes.ENUM('off', 'warn', 'delete', 'remove'),
-        defaultValue: 'off',
+        defaultValue: antistatusmentionStatus,
         allowNull: false
     },
     action: {
         type: DataTypes.ENUM('warn', 'delete', 'remove'),
-        defaultValue: 'warn',
+        defaultValue: antistatusmentionAction,
         allowNull: false
     },
     warn_limit: {
         type: DataTypes.INTEGER,
-        defaultValue: 3,
+        defaultValue: antistatusmentionWarnLimit,
         allowNull: false
     }
 }, {
@@ -28,6 +28,17 @@ async function initAntiStatusMentionDB() {
     try {
         await AntiStatusMentionDB.sync({ alter: true });
         console.log('AntiStatusMention table ready');
+        
+        // Initialize with default values if empty
+        const count = await AntiStatusMentionDB.count();
+        if (count === 0) {
+            await AntiStatusMentionDB.create({
+                status: antistatusmentionStatus,
+                action: antistatusmentionAction,
+                warn_limit: antistatusmentionWarnLimit
+            });
+            console.log('AntiStatusMention defaults initialized from settings');
+        }
     } catch (error) {
         console.error('Error initializing AntiStatusMention table:', error);
         throw error;
@@ -38,15 +49,19 @@ async function getAntiStatusMentionSettings() {
     try {
         const [settings] = await AntiStatusMentionDB.findOrCreate({
             where: {},
-            defaults: {}
+            defaults: {
+                status: antistatusmentionStatus,
+                action: antistatusmentionAction,
+                warn_limit: antistatusmentionWarnLimit
+            }
         });
         return settings;
     } catch (error) {
         console.error('Error getting anti-status-mention settings:', error);
         return { 
-            status: 'off', 
-            action: 'warn', 
-            warn_limit: 3
+            status: antistatusmentionStatus, 
+            action: antistatusmentionAction, 
+            warn_limit: antistatusmentionWarnLimit
         };
     }
 }
