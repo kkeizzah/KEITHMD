@@ -1,15 +1,15 @@
 const { DataTypes } = require('sequelize');
-const { database } = require('../settings');
+const { database, greetEnabled, greetMessage } = require('../settings');
 
 const GreetDB = database.define('greet', {
     enabled: {
         type: DataTypes.BOOLEAN,
-        defaultValue: false,
+        defaultValue: greetEnabled,
         allowNull: false
     },
     message: {
         type: DataTypes.TEXT,
-        defaultValue: "Hello @user 👋\nWelcome to my chat!\nHow can I help you today?",
+        defaultValue: greetMessage,
         allowNull: false
     }
 }, {
@@ -23,6 +23,16 @@ async function initGreetDB() {
     try {
         await GreetDB.sync({ alter: true });
         console.log('Greet table ready');
+        
+        // Initialize with default values if empty
+        const count = await GreetDB.count();
+        if (count === 0) {
+            await GreetDB.create({
+                enabled: greetEnabled,
+                message: greetMessage
+            });
+            console.log('Greet defaults initialized from settings');
+        }
     } catch (error) {
         console.error('Error initializing Greet table:', error);
         throw error;
@@ -33,14 +43,17 @@ async function getGreetSettings() {
     try {
         const settings = await GreetDB.findOne();
         if (!settings) {
-            return await GreetDB.create({});
+            return await GreetDB.create({
+                enabled: greetEnabled,
+                message: greetMessage
+            });
         }
         return settings;
     } catch (error) {
         console.error('Error getting greet settings:', error);
         return { 
-            enabled: false,
-            message: "Hello @user 👋\nWelcome to my chat!"
+            enabled: greetEnabled,
+            message: greetMessage
         };
     }
 }
