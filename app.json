@@ -23,9 +23,29 @@
       "description": "Put any phone numbers you want to be bot owner without + or spaces \",\" Ex: 254748387615, 254796299159",
       "required": false
     },
-    "SESSION_ID": {
-      "description": "add your session id here",
+    "SESSION": {
+      "description": "Add your session id here",
       "required": true
+    },
+    "DATABASE_URL": {
+      "description": "Database URL (leave as default for local SQLite)",
+      "value": "./database.db",
+      "required": false
+    },
+    "ANTICALL_STATUS": {
+      "description": "Enable/disable anti-call feature (true/false)",
+      "value": "false",
+      "required": false
+    },
+    "ANTICALL_MESSAGE": {
+      "description": "Message to send when rejecting calls",
+      "value": "Call me later 🙏",
+      "required": false
+    },
+    "ANTICALL_ACTION": {
+      "description": "Action to take on calls (reject/block)",
+      "value": "reject",
+      "required": false
     }
   },
   "buildpacks": [
